@@ -42,8 +42,8 @@ namespace CSharp.FileSystem
         {
             if (Environment.OSVersion.Platform != PlatformID.Unix) 
                 rootPath = rootPath.ToLower();
-            var pathChunks = _path.Split(new[] {Path.DirectorySeparatorChar});
-            var rootPathChunks = rootPath.Split(new[] {Path.DirectorySeparatorChar});
+            var pathChunks = _path.Split(new[] {Path.DirectorySeparatorChar.ToString()}, StringSplitOptions.RemoveEmptyEntries);
+            var rootPathChunks = rootPath.Split(new[] {Path.DirectorySeparatorChar.ToString()}, StringSplitOptions.RemoveEmptyEntries);
             if (_path.Length == 0)
                 return "";
             if (rootPath.Length == 0)
@@ -52,6 +52,8 @@ namespace CSharp.FileSystem
                 if (pathChunks[0] != rootPathChunks[0])
                     return _path;
             }
+            if (pathChunks.Length > 0 && rootPathChunks.Length > 0 && pathChunks[0] != rootPathChunks[0])
+                return _path;
             var relativePath = "";
             var max = pathChunks.Length > rootPathChunks.Length ? pathChunks.Length : rootPathChunks.Length;
             var isInPath = true;
