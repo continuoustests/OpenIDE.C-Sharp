@@ -107,6 +107,7 @@ namespace CSharp.Commands
 			var templateDir = 
 				System.IO.Path.Combine(
 					System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+					"preserved-data",
 					"create");
 			return System.IO.Directory.GetFiles(templateDir)
 				.Where(x => !x.EndsWith(".swp") && !x.EndsWith("~"));

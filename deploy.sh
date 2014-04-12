@@ -20,6 +20,10 @@ mkdir $BINARYDIR
 mkdir $DEPLOYDIR
 
 mkdir $DEPLOYDIR/C#-files
+mkdir $DEPLOYDIR/C#-files/snippets
+mkdir $DEPLOYDIR/C#-files/preserved-data
+mkdir $DEPLOYDIR/C#-files/preserved-data/new
+mkdir $DEPLOYDIR/C#-files/preserved-data/create
 mkdir $DEPLOYDIR/C#-files/bin
 mkdir $DEPLOYDIR/C#-files/bin/AutoTest.Net
 mkdir $DEPLOYDIR/C#-files/bin/ContinuousTests
@@ -36,7 +40,9 @@ cp $BINARYDIR/C#.exe $DEPLOYDIR/C#-files/C#.exe
 cp $BINARYDIR/ICSharpCode.NRefactory.CSharp.dll $DEPLOYDIR/C#-files/ICSharpCode.NRefactory.CSharp.dll
 cp $BINARYDIR/ICSharpCode.NRefactory.dll $DEPLOYDIR/C#-files/ICSharpCode.NRefactory.dll
 cp $BINARYDIR/Mono.Cecil.dll $DEPLOYDIR/C#-files/Mono.Cecil.dll
-cp -r $ROOT/resources/templates/* $DEPLOYDIR/C#-files
+cp -r $ROOT/resources/templates/new/* $DEPLOYDIR/C#-files/preserved-data/new
+cp -r $ROOT/resources/templates/create/* $DEPLOYDIR/C#-files/preserved-data/create
+cp -r $ROOT/resources/templates/snippets/* $DEPLOYDIR/C#-files/snippets
 cp $ROOT/resources/initialize.sh $DEPLOYDIR/C#-files
 cp $ROOT/resources/initialize.bat $DEPLOYDIR/C#-files
 cp -r $LIB/AutoTest.Net/* $DEPLOYDIR/C#-files/bin/AutoTest.Net
