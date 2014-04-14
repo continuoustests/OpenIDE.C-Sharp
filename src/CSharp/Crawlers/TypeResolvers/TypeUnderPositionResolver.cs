@@ -82,9 +82,14 @@ namespace CSharp.Crawlers.TypeResolvers
 				if (j + 1 != line)
 					column = 1;
 				for (int i = column - 1; i < content.Length; i++) {
+					var previous = ' ';
 					var c = chars[i];
+					if (i > 0)
+						previous = chars[i-1];
 					if ((c == '.' && isPastEndPosition(j + 1, i + 1, endLine, endColumn)) ||
-                        _operators.Contains(c)) {
+                        _operators.Contains(c) ||
+                        (_whitespace.Contains(c) && !_operators.Contains(previous)))
+					{
 						exit = true;
 						break;
 					}

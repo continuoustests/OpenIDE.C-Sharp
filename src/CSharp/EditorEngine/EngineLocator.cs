@@ -151,6 +151,20 @@ namespace CSharp.EditorEngine
             return reply;
         }
 
+        public string GetCaret()
+        {
+            var client = _clientFactory.Invoke();
+            client.Connect(Port, (s) => {});
+            if (!client.IsConnected) {
+                Logger.Write("Editor is not connected.");
+                return "";
+            }
+            var query = "get-caret";
+            var reply = client.Request(query);
+            client.Disconnect();
+            return reply;
+        }
+
         public void Run(string[] arguments)
         {
             var sb = new StringBuilder();

@@ -29,9 +29,14 @@ namespace CSharp.Commands
 
 		public void Execute(IResponseWriter writer, string[] args)
 		{
-			if (args.Length != 1)
-				return;
-			var chunks = args[0].Split(new[] { "|" }, StringSplitOptions.RemoveEmptyEntries);
+            var instance = new EngineLocator(new FS()).GetInstance(Environment.CurrentDirectory);
+            if (instance == null)
+            	return;
+            var caret = instance.GetCaret();
+            if (caret == "")
+            	return;
+            var lines = caret.Split(new[] {Environment.NewLine}, StringSplitOptions.None);
+			var chunks = lines[0].Split(new[] { "|" }, StringSplitOptions.RemoveEmptyEntries);
 			if (chunks.Length != 3)
 				return;
 			try {
@@ -45,27 +50,23 @@ namespace CSharp.Commands
 	                    (fileName) => File.ReadAllText(fileName),
 						(fileName) => File.Delete(fileName),
                         (fileName) => {
-                            var instance = new EngineLocator(new FS()).GetInstance(Environment.CurrentDirectory);
-                            if (instance != null)
-                                return instance.GetDirtyFiles(fileName);
-                            return "";
+                            return instance.GetDirtyFiles(fileName);
                         }).Parse(file);
 
 				var name = new TypeUnderPositionResolver()
 					.GetTypeName(file, File.ReadAllText(file), line, column);
-				writer.Write("Found name {0}", name);
 				var signature = new FileContextAnalyzer(_globalCache, cache)
 					.GetSignatureFromNameAndPosition(file, name, line, column);
-				writer.Write("Found signature {0}", signature);
-				var pos = cache.PositionFromSignature(signature);
-				if (pos != null) {
-					writer.Write("command|editor goto {0}|{1}|{2}", pos.Fullpath, pos.Line, pos.Column);
-					return;
+				if (signature != null) {
+					var pos = cache.PositionFromSignature(signature);
+					if (pos != null) {
+						writer.Write("command|editor goto {0}|{1}|{2}", pos.Fullpath, pos.Line, pos.Column);
+						return;
+					}
+					pos = _globalCache.PositionFromSignature(signature);
+					if (pos != null)
+						writer.Write("command|editor goto {0}|{1}|{2}", pos.Fullpath, pos.Line, pos.Column);
 				}
-				writer.Write("Looking in global cache");
-				pos = _globalCache.PositionFromSignature(signature);
-				if (pos != null)
-					writer.Write("command|editor goto {0}|{1}|{2}", pos.Fullpath, pos.Line, pos.Column);
 			} catch (Exception ex) {
 				writer.Write(ex.ToString());
 			}

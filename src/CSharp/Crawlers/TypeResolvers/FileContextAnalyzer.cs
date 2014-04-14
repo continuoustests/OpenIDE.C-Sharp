@@ -6,12 +6,14 @@ namespace CSharp.Crawlers.TypeResolvers
 {
 	public class FileContextAnalyzer
 	{
+        private IOutputWriter _globalCache;
 		private IOutputWriter _cache;
         private List<ICodeReference> _references;
         private List<ICodeReference> _referenceContainers;
 
 		public FileContextAnalyzer(IOutputWriter globalCache, IOutputWriter cache)
 		{
+            _globalCache = globalCache;
 			_cache = cache;
             buildReferenceMap();
 		}
@@ -29,12 +31,43 @@ namespace CSharp.Crawlers.TypeResolvers
         public string GetSignatureFromNameAndPosition(string file, string name, int line, int column)
         {
             var parent = getParent(file, line, column);
-            var match = _references.FirstOrDefault(
-                x => 
-                    x.Parent == parent.ToNamespaceSignature() && 
-                    x.Name == name);
-            if (match != null)
-                return match.Signature;
+
+            Func<string,string> getType = (ns) => {
+                var signature = ns + "." + name;
+                if (_cache.ContainsType(signature) || _globalCache.ContainsType(signature))
+                    return signature;
+                var end = ns.LastIndexOf(".");
+                if (end != -1) {
+                    var parentNS = ns.Substring(0, end);
+                    return getType(parentNS);
+                }
+                return null;
+            };
+
+            Func<ICodeReference,string> getSignature = (parentRef) => {
+                if (parentRef == null)
+                    return null;
+                var match = _references.FirstOrDefault(
+                    x => 
+                        x.Parent == parentRef.ToNamespaceSignature() && 
+                        x.Name == name);
+                if (match != null)
+                    return match.Signature;
+                if (parentRef.Parent != null && parentRef.Parent != "") {
+                    return getSignature(_referenceContainers.FirstOrDefault(x => x.ToNamespaceSignature() == parentRef.Parent));
+                } else {
+                    return getType(parentRef.ToNamespaceSignature());
+                }
+            };
+            
+            var resolvedSignature = getSignature(parent);
+            if (resolvedSignature != null)
+                return resolvedSignature;
+            foreach (var ns in _cache.Usings) {
+                var useSignature = getType(ns.Name);
+                if (useSignature != null)
+                    return useSignature;
+            }
             return null;
         }
 

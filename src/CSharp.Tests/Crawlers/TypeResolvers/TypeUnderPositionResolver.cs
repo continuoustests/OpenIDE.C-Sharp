@@ -17,6 +17,30 @@ namespace CSharp.Tests.Crawlers.TypeResolvers
 			_resolver = 
 				new TypeUnderPositionResolver();
 		}
+
+		[Test]
+		public void Can_resolve_simple_method_argument()
+		{
+			var content = 
+				"using System;" + Environment.NewLine +
+				Environment.NewLine +
+				"\tnamespace CSharp.Crawlers.TypeResolvers" + Environment.NewLine +
+				"{" + Environment.NewLine +
+				"\tpublic void Bleh(ISomeInterface bleh) {" + Environment.NewLine +
+				"\t}" + Environment.NewLine +
+				"}";
+			var ns = _resolver.GetTypeName("file", content, 5, 24);
+			Assert.That(ns, Is.EqualTo("ISomeInterface"));
+		}
+
+
+		[Test]
+		public void Can_resolve_instance_construction()
+		{
+			var content = "var bleh = new SomeClass();";
+			var ns = _resolver.GetTypeName("file", content, 1, 20);
+			Assert.That(ns, Is.EqualTo("SomeClass"));
+		}
 		
 		[Test]
 		public void Can_resolve_single_line_definition_from_position()
