@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.IO;
+using System.Diagnostics;
 using System.Collections.Generic;
 using CSharp.Commands;
 using CSharp.Files;
@@ -31,10 +32,10 @@ namespace CSharp
             	if (args.Length != 2) {
             		Console.WriteLine("Usage: initialize KEY_PATH");
             	}
-            	Logger.Write("Running C# plugin as daemon");
-				var writer = new ConsoleResponseWriter();
             	_keyPath = args[1];
 				setupLogging(_keyPath);
+            	Logger.Write("Running C# plugin as daemon");
+				var writer = new ConsoleResponseWriter();
             	_cache = new OutputWriter(new NullResponseWriter());
             	_dispatcher = new Dispatcher();
 				configureHandlers(_dispatcher);
@@ -51,9 +52,8 @@ namespace CSharp
 		            writer.Write("end-of-conversation");
 	            }
             } else {
-            	Logger.Write("Running C# plugin as comman-line app");
             	_keyPath = Environment.CurrentDirectory;
-				setupLogging(_keyPath);
+            	Logger.Write("Running C# plugin as comman-line app");
             	_cache = new OutputWriter(new NullResponseWriter());
             	_dispatcher = new Dispatcher();
 				configureHandlers(_dispatcher);
@@ -65,11 +65,15 @@ namespace CSharp
         }
 
 		private static void setupLogging(string path) {
-			// TODO: Set up logging again using a more detached way of getting config
-			//var reader = new ConfigReader(path);
-			//var logPath = reader.Get("oi.logpath");
-			//if (Directory.Exists(logPath))
-            //	Logger.Assign(new FileLogger(Path.Combine(logPath, "C#.log")));
+			var lines = new List<string>();
+			var proc = new Process();
+			proc.Query("oi", "conf read oi.logpath", false, path, (error, line) => {
+				if (!error)
+					lines.Add(line);
+			});
+			if (lines.Count > 0 && Directory.Exists(lines[0])) {
+				Logger.Assign(new FileLogger(Path.Combine(lines[0], "C#.log")));
+			}
 		}
 
         private static void handleMessage(CommandMessage msg, IResponseWriter writer, bool serverMode)
@@ -128,7 +132,7 @@ namespace CSharp
 			dispatcher.Register(new RemoveFileHandler(getTypesProvider));
 			dispatcher.Register(new SignatureFromPositionHandler(_cache));
 			dispatcher.Register(new MembersFromUnknownSignatureHandler());
-			dispatcher.Register(new GoToDefinitionHandler(_cache));
+			dispatcher.Register(new GoToDefinitionHandler(_keyPath, _cache));
 		}
 		
 		static VSFileTypeResolver getFileTypeResolver()
