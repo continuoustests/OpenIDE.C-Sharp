@@ -57,7 +57,7 @@ namespace CSharp.Tests.Crawlers.TypeResolvers
         {
             Assert.That(
                 signatureFromPosition(12, 15), // if (_isValid)");
-                Is.EqualTo("System.Bool MyNS.MyClass._isValid"));
+                Is.EqualTo("System.Boolean MyNS.MyClass._isValid"));
         }
 
         [Test]
@@ -69,7 +69,7 @@ namespace CSharp.Tests.Crawlers.TypeResolvers
         private string signatureFromPosition(int line, int column) {
             var name =
                 new TypeUnderPositionResolver()
-                    .GetTypeName(_file, _fileContent, line, column);
+                    .GetTrainwreck(_fileContent, line, column);
             return 
                 _analyzer.GetSignatureFromNameAndPosition(_file, name, line, column);
         }

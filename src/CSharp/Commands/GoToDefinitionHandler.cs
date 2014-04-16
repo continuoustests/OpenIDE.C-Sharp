@@ -60,7 +60,7 @@ namespace CSharp.Commands
                         }).Parse(file);
 
 				var name = new TypeUnderPositionResolver()
-					.GetTypeName(file, File.ReadAllText(file), line, column);
+					.GetTypeName(File.ReadAllText(file), line, column);
 				Logger.Write("Name is " + name);
 				var signature = new FileContextAnalyzer(_globalCache, cache)
 					.GetSignatureFromNameAndPosition(file, name, line, column);

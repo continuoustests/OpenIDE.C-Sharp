@@ -26,18 +26,27 @@ namespace CSharp.Crawlers.TypeResolvers
 		private char[] _whitespace = new char[]
             {'\r','\n',' ','\t'};
         private char[] _validBeforeWhitespace = new char[]
-            {'.','<','>'};
+            {'.',',','<','>'};
 
-		public string GetTypeName(string filePath, string content, int line, int column) {
+		public string GetTypeName(string content, int line, int column) {
 			var lines = content
 				.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
-			var location = rewindToBeginningOfWord(lines, line, column);
+			var location = rewindToBeginningOfWord(lines, line, column, false);
 			if (location == null)
 				return null;
-			return readForward(lines, location.Line, location.Column, line, column);
+			return readForward(lines, location.Line, location.Column, line, column, false);
 		}
 
-		private TypeUnderPositionResolver.Location rewindToBeginningOfWord(string[] lines, int line, int column) {
+		public string GetTrainwreck(string content, int line, int column) {
+			var lines = content
+				.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+			var location = rewindToBeginningOfWord(lines, line, column, true);
+			if (location == null)
+				return null;
+			return readForward(lines, location.Line, location.Column, line, column, true);
+		}
+
+		private TypeUnderPositionResolver.Location rewindToBeginningOfWord(string[] lines, int line, int column, bool getTrainwreck) {
 			var startLine = line;
 			var startColumn = column;
 			var lastchar = '.';
@@ -52,13 +61,26 @@ namespace CSharp.Crawlers.TypeResolvers
 					startColumn = chars.Length;
 				for (int i = startColumn - 2; i >= 0; i--) {
 					var c = chars[i];
-					if (_whitespace.Contains(c) && !_validBeforeWhitespace.Contains(lastchar)) {
-						exit = true;
-						break;
-					}
-					if (_operators.Contains(c)) {
-						exit = true;
-						break;
+					if (getTrainwreck) {
+						if (_whitespace.Contains(c) && !_validBeforeWhitespace.Contains(lastchar)) {
+							exit = true;
+							break;
+						}
+
+						if (_operators.Contains(c)) {
+							exit = true;
+							break;
+						}
+					} else {
+						if (_whitespace.Contains(c)) {
+							exit = true;
+							break;
+						}
+
+						if (_operators.Contains(c) || _validBeforeWhitespace.Contains(c)) {
+							exit = true;
+							break;
+						}
 					}
 					if (!_whitespace.Contains(c))
 						lastchar = c;
@@ -73,7 +95,7 @@ namespace CSharp.Crawlers.TypeResolvers
 				};
 		}
 
-		private string readForward(string[] lines, int line, int column, int endLine, int endColumn) {
+		private string readForward(string[] lines, int line, int column, int endLine, int endColumn, bool getTrainwreck) {
 			var signature = "";
 			var exit = false;
 			for (int j = line - 1; j >= 0; j++) {
@@ -86,9 +108,11 @@ namespace CSharp.Crawlers.TypeResolvers
 					var c = chars[i];
 					if (i > 0)
 						previous = chars[i-1];
-					if ((c == '.' && isPastEndPosition(j + 1, i + 1, endLine, endColumn)) ||
+					var isPastEnd = isPastEndPosition(j + 1, i + 1, endLine, endColumn);
+					if ((c == '.' && isPastEnd) ||
                         _operators.Contains(c) ||
-                        (_whitespace.Contains(c) && !_operators.Contains(previous)))
+                        (!getTrainwreck && _validBeforeWhitespace.Contains(c)) ||
+                        (_whitespace.Contains(c) && !_operators.Contains(previous)) && isPastEnd)
 					{
 						exit = true;
 						break;
@@ -99,8 +123,8 @@ namespace CSharp.Crawlers.TypeResolvers
 					break;
 			}
 			foreach (var c in _whitespace)
-				signature = signature.Replace(c.ToString(), "");
-			return signature;
+				signature = signature.Replace(c.ToString(), " ");
+			return signature.Trim();
 		}
 
         private bool isPastEndPosition(int line, int column, int endLine, int endColumn) {

@@ -29,7 +29,7 @@ namespace CSharp.Tests.Crawlers.TypeResolvers
 				"\tpublic void Bleh(ISomeInterface bleh) {" + Environment.NewLine +
 				"\t}" + Environment.NewLine +
 				"}";
-			var ns = _resolver.GetTypeName("file", content, 5, 24);
+			var ns = _resolver.GetTypeName(content, 5, 24);
 			Assert.That(ns, Is.EqualTo("ISomeInterface"));
 		}
 
@@ -38,7 +38,7 @@ namespace CSharp.Tests.Crawlers.TypeResolvers
 		public void Can_resolve_instance_construction()
 		{
 			var content = "var bleh = new SomeClass();";
-			var ns = _resolver.GetTypeName("file", content, 1, 20);
+			var ns = _resolver.GetTypeName(content, 1, 20);
 			Assert.That(ns, Is.EqualTo("SomeClass"));
 		}
 		
@@ -51,7 +51,7 @@ namespace CSharp.Tests.Crawlers.TypeResolvers
 				"\tnamespace CSharp.Crawlers.TypeResolvers" + Environment.NewLine +
 				"{" + Environment.NewLine +
 				"}";
-			var ns = _resolver.GetTypeName("file", content, 3, 20);
+			var ns = _resolver.GetTrainwreck(content, 3, 20);
 			Assert.That(ns, Is.EqualTo("CSharp.Crawlers"));
 		}
 
@@ -74,7 +74,7 @@ namespace CSharp.Tests.Crawlers.TypeResolvers
 				"\t\t\t}" + Environment.NewLine +
 				"\t\t}" + Environment.NewLine +
 				"\t}";
-			var ns = _resolver.GetTypeName("file", content, 10, 7);
+			var ns = _resolver.GetTrainwreck(content, 10, 7);
 			Assert.That(ns, Is.EqualTo("MyMethod"));
 		}
 
@@ -98,8 +98,23 @@ namespace CSharp.Tests.Crawlers.TypeResolvers
 				"\t\t\t}" + Environment.NewLine +
 				"\t\t}" + Environment.NewLine +
 				"\t}";
-			var ns = _resolver.GetTypeName("file", content, 12, 12);
+			var ns = _resolver.GetTypeName(content, 12, 12);
 			Assert.That(ns, Is.EqualTo("str"));
+		}
+
+		[Test]
+		public void Can_resolve_names_and_trainwrecks()
+		{
+			validateLine("public void Bleh(ISomething meh)", 1, 31, "meh", "meh");
+			validateLine("    var bleh = get.something .from.this()", 1, 38, "this", "get.something .from.this");
+			validateLine("public void Bleh<SomeType>(ISomething meh)", 1, 20, "SomeType", "Bleh<SomeType>");
+			validateLine("public void Bleh<SomeType,string>(ISomething meh)", 1, 20, "SomeType", "Bleh<SomeType,string>");
+		}
+
+		private void validateLine(string content, int line, int column, string expectedName, string expectedTrainwreck)
+		{
+			Assert.That(_resolver.GetTypeName(content, line, column), Is.EqualTo(expectedName));
+			Assert.That(_resolver.GetTrainwreck(content, line, column), Is.EqualTo(expectedTrainwreck));
 		}
 	}
 }
