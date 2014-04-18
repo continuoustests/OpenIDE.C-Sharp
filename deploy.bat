@@ -44,7 +44,7 @@ xcopy /S /I /E %LIB%\ContinuousTests %DEPLOYDIR%\C#-files\bin\ContinuousTests
 REM Building packages
 ECHO Building packages
 
-%DEPLOYDIR%\oi package build "Packages\C#" %PACKAGEDIR%/oipkg
+oi package build "ReleaseBinaries\C#" %DEPLOYDIR%
 rmdir /Q /S %DEPLOYDIR%\C#-files\bin
 del %DEPLOYDIR%\C#-files\initialize.*
 del %DEPLOYDIR%\C#-files\package.json
