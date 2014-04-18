@@ -32,7 +32,8 @@ namespace CSharp.Crawlers.TypeResolvers
         {
             var parent = getParent(file, line, column);
 
-            Func<string,string> getType = (ns) => {
+            Func<string,string> getType = (ns) => { return null; };
+            getType = (ns) => {
                 var signature = ns + "." + name;
                 if (_cache.ContainsType(signature) || _globalCache.ContainsType(signature))
                     return signature;
@@ -44,7 +45,8 @@ namespace CSharp.Crawlers.TypeResolvers
                 return null;
             };
 
-            Func<ICodeReference,string> getSignature = (parentRef) => {
+            Func<ICodeReference,string> getSignature = (parentRef) => { return null; };
+            getSignature = (parentRef) => {
                 if (parentRef == null)
                     return null;
                 var match = _references.FirstOrDefault(
