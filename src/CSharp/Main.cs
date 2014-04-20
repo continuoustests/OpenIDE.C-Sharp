@@ -133,6 +133,8 @@ namespace CSharp
 			dispatcher.Register(new SignatureFromPositionHandler(_cache));
 			dispatcher.Register(new MembersFromUnknownSignatureHandler());
 			dispatcher.Register(new GoToDefinitionHandler(_keyPath, _cache));
+			dispatcher.Register(new GoToDefinitionHandler(_keyPath, _cache));
+			dispatcher.Register(new GetWordFromCaretHandler(_keyPath));
 		}
 		
 		static VSFileTypeResolver getFileTypeResolver()
