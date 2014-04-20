@@ -22,7 +22,7 @@ namespace CSharp.Crawlers.TypeResolvers
             ResolveMatchingType(new[] { type });
         }
 
-        public void ResolveMatchingType(params PartialType[] types) {
+        public void ResolveMatchingType(PartialType[] types) {
             var usingsMap = getUsingsMap(_localCache, types);
             var usingAliasesMap = getUsingAliasesMap(_localCache, types);
             foreach (var type in types) {

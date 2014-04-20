@@ -24,52 +24,45 @@ namespace CSharp.Crawlers.TypeResolvers
 
         public void ResolveAllUnresolved(IOutputWriter cache) {
             Logger.Write("Starting final resolve");
-            var padlock = new object();
-            var numFinished = 0;
+            var classes = cache.Classes.Where(x => !x.AllTypesAreResolved).AsQueryable();
+            var interfaces = cache.Interfaces.Where(x => !x.AllTypesAreResolved).AsQueryable();
+            var structs = cache.Structs.Where(x => !x.AllTypesAreResolved).AsQueryable();
+            var enums = cache.Enums.Where(x => !x.AllTypesAreResolved).AsQueryable();
+            var fields = cache.Fields.Where(x => !x.AllTypesAreResolved).AsQueryable();
+            var methods = cache.Methods.Where(x => !x.AllTypesAreResolved).AsQueryable();
+            var variables = cache.Variables.Where(x => !x.AllTypesAreResolved).AsQueryable();
             for (int i = 0; i < cache.Files.Count; i++) {
                 var file = cache.Files[i];
-                ThreadPool
-                    .QueueUserWorkItem((evnt) => {
-                        Logger.Write("Starting final resolve for: " + file.ToString());
-                        var partials = new List<PartialType>();
-                        getPartials(cache.Classes, file, partials);
-                        getPartials(cache.Interfaces, file, partials);
-                        getPartials(cache.Structs, file, partials);
-                        getPartials(cache.Enums, file, partials);
-                        if (_resolveMembers) {
-                            getPartials(cache.Fields, file, partials);
-                            getPartials(cache.Methods, file, partials);
-                            getPartials(cache.Variables, file, partials);
-                        }
-                        _cache.ResolveMatchingType(partials.ToArray());
-                        lock (padlock) {
-                            numFinished++;
-                        }
-                        Logger.Write("Completed final resolve for: " + file.ToString());
-                    });
-            }
-            while (numFinished != cache.Files.Count) {
-                Thread.Sleep(100);
+                var partials = new List<PartialType>();
+                getPartials(classes, file, partials);
+                getPartials(interfaces, file, partials);
+                getPartials(structs, file, partials);
+                getPartials(enums, file, partials);
+                if (_resolveMembers) {
+                    getPartials(fields, file, partials);
+                    getPartials(methods, file, partials);
+                    getPartials(variables, file, partials);
+                }
+                _cache.ResolveMatchingType(partials.ToArray());
             }
             Logger.Write("Completed final resolve");
         }
 
-        private static void getPartials(IEnumerable<ICodeReference> codeRefs, FileRef file, List<PartialType> partials)
+        private static void getPartials(IQueryable<ICodeReference> codeRefs, FileRef file, List<PartialType> partials)
         {
-            codeRefs
-                .Where(x => !x.AllTypesAreResolved && x.File.File == file.File).ToList()
-                .ForEach(x => {
-                    x.AllTypesAreResolved = true;
-                    partials.AddRange(
-                        x.GetResolveStatements()
-                            .Select(stmnt => 
-                                new PartialType(
-                                    file,
-                                    new Point(x.Line, x.Column),
-                                    stmnt.Value,
-                                    stmnt.Namespace,
-                                    stmnt.Replace)));
-                });
+            var unresolved = codeRefs.Where(x => x.File.File == file.File);
+            foreach (var x in unresolved) {
+                x.AllTypesAreResolved = true;
+                partials.AddRange(
+                    x.GetResolveStatements()
+                        .Select(stmnt => 
+                            new PartialType(
+                                file,
+                                new Point(x.Line, x.Column),
+                                stmnt.Value,
+                                stmnt.Namespace,
+                                stmnt.Replace)));
+            }
         }
     }
 
