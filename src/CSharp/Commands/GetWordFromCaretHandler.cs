@@ -38,12 +38,16 @@ namespace CSharp.Commands
             if (chunks.Length != 3)
                 return;
             try {
-                var file = chunks[0];
+                var file = chunks[0]; 
                 var line = int.Parse(chunks[1]);
                 var column = int.Parse(chunks[2]);
                 
+                var start = caret.IndexOf(Environment.NewLine);
+                if (start == -1)
+                    return;
+                start += Environment.NewLine.Length;
                 var name = new TypeUnderPositionResolver()
-                    .GetTypeName(File.ReadAllText(file), line, column);
+                    .GetTypeName(caret.Substring(start, caret.Length - start), line, column);
                 if (name == null || name == "")
                     return;
                 writer.Write(name);
