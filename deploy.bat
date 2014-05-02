@@ -16,10 +16,10 @@ IF EXIST %DEPLOYDIR% (
 mkdir %DEPLOYDIR%
 
 mkdir %DEPLOYDIR%\C#-files
+mkdir %DEPLOYDIR%\C#-files\scripts
 mkdir %DEPLOYDIR%\C#-files\snippets
 mkdir %DEPLOYDIR%\C#-files\preserved-data
 mkdir %DEPLOYDIR%\C#-files\preserved-data\new
-mkdir %DEPLOYDIR%\C#-files\preserved-data\create
 mkdir %DEPLOYDIR%\C#-files\bin
 mkdir %DEPLOYDIR%\C#-files\bin\AutoTest.Net
 mkdir %DEPLOYDIR%\C#-files\bin\ContinuousTests
@@ -34,7 +34,7 @@ copy %BINARYDIR%\ICSharpCode.NRefactory.CSharp.dll %DEPLOYDIR%\C#-files\ICSharpC
 copy %BINARYDIR%\ICSharpCode.NRefactory.dll %DEPLOYDIR%\C#-files\ICSharpCode.NRefactory.dll
 copy %BINARYDIR%\Mono.Cecil.dll %DEPLOYDIR%\C#-files\Mono.Cecil.dll
 xcopy /S /I /E %ROOT%\resources\templates\new %DEPLOYDIR%\C#-files\preserved-data\new
-xcopy /S /I /E %ROOT%\resources\templates\create %DEPLOYDIR%\C#-files\preserved-data\create
+xcopy /S /I /E %ROOT%\resources\templates\scripts %DEPLOYDIR%\C#-files\scripts
 xcopy /S /I /E %ROOT%\resources\templates\snippets %DEPLOYDIR%\C#-files\snippets
 copy %ROOT%\resources\initialize.bat %DEPLOYDIR%\C#-files
 copy %ROOT%\resources\initialize.sh %DEPLOYDIR%\C#-files

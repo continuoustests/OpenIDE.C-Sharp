@@ -128,7 +128,7 @@ namespace CSharp.Commands
 		private INewTemplate pickTemplate(string templateName, string type)
 		{
 			var template = getTemplates(type)
-				.FirstOrDefault(x => x.Contains(Path.DirectorySeparatorChar + templateName + "."));
+				.FirstOrDefault(x => x.Contains(Path.DirectorySeparatorChar + templateName));
 			if (template == null)
 				return null;
 			return new NewTemplate(template, _fileTypeResolver, _keyPath);
@@ -243,7 +243,7 @@ namespace CSharp.Commands
 				var position = lines[1].Trim().Split(new[] {'|'});
 				Line = int.Parse(position[0].Trim());
 				Column = int.Parse(position[1].Trim());
-				_definition = position[2].Trim();
+				_definition = lines[2].Trim();
 				_lines = lines.Skip(3).ToArray();
 			} catch (Exception ex) {
 				Logger.Write(ex);
