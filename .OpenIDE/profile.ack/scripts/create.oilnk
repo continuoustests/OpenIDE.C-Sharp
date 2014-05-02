@@ -1,0 +1,6 @@
+{
+    "link": {
+        "executable": "create-files/create.py",
+        "params": "{args}"
+    }
+}
