@@ -51,9 +51,14 @@ namespace CSharp.Commands
 		private BaseCommandHandlerParameter getUsage(string template)
 		{
 			var name = Path.GetFileNameWithoutExtension(template);
-			var definition = new NewTemplate(template, null, _keyPath).GetUsageDefinition();
+			var templateInstance = new NewTemplate(template, null, _keyPath);
+			if (!templateInstance.IsValid)
+				return null;
+			var definition = templateInstance.GetUsageDefinition();
+			if (definition == null)
+				return null;
 			var parser = new TemplateDefinitionParser();
-			var usage = parser.Parse(name, definition);
+			var usage = parser.Parse(name, "Creates a new "+definition);
 			if (usage == null)
 				return null;
 			var fileParam = new BaseCommandHandlerParameter("FILE", "Path to the file to be create");
@@ -89,22 +94,21 @@ namespace CSharp.Commands
 		
 		public void Execute(IResponseWriter writer, string[] arguments)
 		{
-			if (arguments.Length < 2)
-			{
+			if (arguments.Length < 2) {
 				writer.Write("error|Invalid number of arguments. " +
 					"Usage: new {template name} {item name} {template arguments}");
 				return;
 			}
-			
+						
 			var className = getFileName(arguments[1]);
 			var location = getLocation(arguments[1]);
 			if (!_project.Read(location, _getTypesProviderByLocation))
 				return;
 			
 			var template = _pickTemplate(arguments[0], _project.Type);
-			if (template == null)
+			if (template == null || !template.IsValid)
 			{
-				writer.Write("error|No template with the name {0} exists.", arguments[0]);
+				writer.Write("error|No valid template with the name {0} exists.", arguments[0]);
 				return;
 			}
 			var ns = getNamespace(location, _project.Fullpath, _project.DefaultNamespace);
@@ -195,6 +199,7 @@ namespace CSharp.Commands
 	
 	public interface INewTemplate
 	{
+		bool IsValid { get; }
 		IFile File { get; }
 		int Line { get; }
 		int Column { get; }
@@ -212,7 +217,11 @@ namespace CSharp.Commands
 	{
 		private IResolveFileTypes _fileTypeResolver;
 		private string _file;
+		private string _filetype;
+		private string _definition;
+		private string[] _lines = new string[] {};
 		
+		public bool IsValid { get { return _lines.Length > 0; } }
 		public IFile File { get; private set; }
 		public int Line { get; private set; }
 		public int Column { get; private set; }
@@ -221,13 +230,29 @@ namespace CSharp.Commands
 		{
 			_fileTypeResolver = fileTypeResolver;
 			_file = file;
-			Line = 0;
-			Column = 0;
+			readTemplate();	
+		}
+
+		private void readTemplate()
+		{
+			try {
+				var lines = System.IO.File.ReadAllLines(_file);
+				if (lines.Length < 4)
+					return;
+				_filetype = lines[0].Trim();
+				var position = lines[1].Trim().Split(new[] {'|'});
+				Line = int.Parse(position[0].Trim());
+				Column = int.Parse(position[1].Trim());
+				_definition = position[2].Trim();
+				_lines = lines.Skip(3).ToArray();
+			} catch (Exception ex) {
+				Logger.Write(ex);
+			}
 		}
 
 		public string GetUsageDefinition()
 		{
-			return run("get_definition");
+			return _definition;
 		}
 		
 		public void Run(
@@ -241,7 +266,7 @@ namespace CSharp.Commands
 			try
 			{
 				var filename = 
-					Path.Combine(location, string.Format("{0}{1}", itemName, run("get_file_extension")));
+					Path.Combine(location, string.Format("{0}{1}", itemName, _filetype));
 				if (System.IO.File.Exists(filename))
 				{
 					Console.WriteLine("error|File already exists {0}", filename);
@@ -255,10 +280,11 @@ namespace CSharp.Commands
 				var xml = getXml(location, projectPath, projectType, arguments);
 				var tempFile = Path.GetTempFileName();
 				System.IO.File.WriteAllText(tempFile, xml);
-				var content = run(string.Format("\"{0}\" \"{1}\" \"{2}\"", itemName, nameSpace, tempFile));
+				var content = new StringBuilder();
+				foreach (var line in _lines)
+					content.AppendLine(line.Replace("{namespace}", nameSpace).Replace("{itemname}", itemName));
 				System.IO.File.Delete(tempFile);
-				System.IO.File.WriteAllText(filename, content);
-				getPositionInfo();
+				System.IO.File.WriteAllText(filename, content.ToString());
 			}
 			catch (Exception ex)
 			{
@@ -289,44 +315,6 @@ namespace CSharp.Commands
 				writer.WriteEndElement();
 			}
 			return sb.ToString();
-		}
-		
-		private void getPositionInfo()
-		{
-			try
-			{
-				var positionString = run("get_position")
-					.Split(new string[] { "|" }, StringSplitOptions.RemoveEmptyEntries);
-				Line = int.Parse(positionString[0]);
-				Column = int.Parse(positionString[1]);
-			}
-			catch
-			{
-				Line = 0;
-				Column = 0;
-			}
-		}
-		
-		private string run(string arguments)
-		{
-            var proc = new Process();
-            var sb = new StringBuilder();
-			proc.Query(
-	        	_file,
-	        	arguments,
-	        	false,
-	        	Environment.CurrentDirectory,
-	        	(error, s) => {
-	        			if (error) {
-	        				sb.AppendLine("error|" + s);
-	        				return;
-	        			}
-	        			sb.AppendLine(s);
-	        		});
-			var output = sb.ToString();
-			if (output.Length > Environment.NewLine.Length)
-				return output.Substring(0, output.Length - Environment.NewLine.Length);
-            return output;
 		}
 	}
 }

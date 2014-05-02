@@ -151,7 +151,6 @@
     <Compile Include="Commands\TemplateDefinitionParser.cs" />
     <Compile Include="FileSystem\PathExtensions.cs" />
     <Compile Include="Commands\Dispatcher.cs" />
-    <Compile Include="Commands\CreateHandler.cs" />
     <Compile Include="Commands\GetUsageHandler.cs" />
     <Compile Include="IOutputWriter.cs" />
     <Compile Include="Commands\CrawlHandler.cs" />
