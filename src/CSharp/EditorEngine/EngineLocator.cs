@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
+using System.Diagnostics;
 using CSharp.FileSystem;
 
 namespace CSharp.EditorEngine
@@ -73,8 +74,13 @@ namespace CSharp.EditorEngine
             client.Connect(info.Port, (s) => {});
             var connected = client.IsConnected;
             client.Disconnect();
-            if (!connected)
-                _fs.DeleteFile(info.File);
+            if (!connected) {
+                try {
+					Process.GetProcessById(info.ProcessID);
+				} catch {
+					_fs.DeleteFile(info.File);
+				}
+            }
             return connected;
         }
     }
