@@ -29,6 +29,10 @@ def recurseDir(projectName, replacements, source, destination):
             copyFile(projectName, replacements, os.path.join(source, file), os.path.join(destination, file))
 
 def copy(projecttype, filepath):
+    path_chunks = filepath.split(os.sep)
+    if len(path_chunks) > 1 and filepath.lower().endswith(".csproj") == False:
+        if path_chunks[len(path_chunks)-1] != path_chunks[len(path_chunks)-2]:
+            filepath = os.path.join(filepath, path_chunks[len(path_chunks)-1])
     if filepath.lower().endswith(".csproj") == False:
         filepath = filepath + ".csproj"
     directory = os.path.dirname(filepath)
