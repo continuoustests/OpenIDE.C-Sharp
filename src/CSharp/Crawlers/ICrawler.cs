@@ -5,12 +5,14 @@ namespace CSharp.Crawlers
 	public class CrawlOptions
 	{
 		public bool IsSolutionFile { get; private set; }
+		public bool IsProjectFile { get; private set; }
 		public string File { get; private set; }
 		public string Directory { get; private set; }
 		
 		public CrawlOptions(string path)
 		{
 			IsSolutionFile = System.IO.File.Exists(path) && System.IO.Path.GetExtension(path).Equals(".sln");
+			IsProjectFile = System.IO.File.Exists(path) && System.IO.Path.GetExtension(path).Equals(".csproj");
 			File = null;
 			Directory = null;
 			if (System.IO.File.Exists(path))

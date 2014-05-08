@@ -30,16 +30,17 @@ namespace CSharp.Crawlers
 		{
             Logger.Write("Crawling " + options.ToString());
 			List<Project> projects;
-			if (!options.IsSolutionFile && options.File != null)
-			{
+			if (!options.IsSolutionFile && options.File != null) {
+                if (options.IsProjectFile)
+                    _builder.WriteProject(new Project(options.File));
 				parseFile(new FileRef(options.File, null));
                 Logger.Write("Done crawling single file " + options.ToString());
 				return;
-			}
-			else if (options.IsSolutionFile)
+			} else if (options.IsSolutionFile) {
 				projects = new SolutionReader(options.File).ReadProjects();
-			else
+            } else {
 				projects = getProjects(options.Directory);
+            }
             loadmscorlib();
 			projects.ForEach(x => crawl(x));
 
