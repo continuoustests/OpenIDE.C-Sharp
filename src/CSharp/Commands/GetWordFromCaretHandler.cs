@@ -38,7 +38,6 @@ namespace CSharp.Commands
             if (chunks.Length != 3)
                 return;
             try {
-                var file = chunks[0]; 
                 var line = int.Parse(chunks[1]);
                 var column = int.Parse(chunks[2]);
                 
