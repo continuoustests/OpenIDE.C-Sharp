@@ -18,7 +18,7 @@ namespace {namespace}
         public string Usage {
             get {
                 return
-                    Command+"|\"???\" " +
+                    Command+"|\\"???\\" " +
                     "end ";
             }
         }
