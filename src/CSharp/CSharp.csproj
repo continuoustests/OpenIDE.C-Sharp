@@ -170,6 +170,7 @@
     <Compile Include="ProcessExtensions.cs" />
     <Compile Include="EditorEngine\Client.cs" />
     <Compile Include="Commands\GetWordFromCaretHandler.cs" />
+    <Compile Include="Commands\GetNamespaceHandler.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

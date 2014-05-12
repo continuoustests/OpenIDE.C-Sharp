@@ -134,6 +134,7 @@ namespace CSharp
 			dispatcher.Register(new GoToDefinitionHandler(_keyPath, _cache));
 			dispatcher.Register(new GoToDefinitionHandler(_keyPath, _cache));
 			dispatcher.Register(new GetWordFromCaretHandler(_keyPath));
+			dispatcher.Register(new GetNamespaceHandler(_keyPath, getTypesProvider));
 		}
 		
 		static VSFileTypeResolver getFileTypeResolver()
