@@ -15,22 +15,26 @@ def print_definitions():
         end
     """)
 
-def run_command(args):
+def run_command(run_location, args):
     if len(args) != 2:
+        print("num"+str(len(args)))
+        print("num"+args[0])
         print("Invalid number of arguments")
         return
+
+    path = os.path.join(run_location, args[1])
     if args[0] == "console":
-        copydir.copy("console", args[1])
-        print("command|editor goto \""+os.path.join(args[1], "Program.cs")+"|8|3\"")
+        copydir.copy("console", path)
+        print("command|editor goto \""+os.path.join(path, "Program.cs")+"|8|3\"")
     if args[0] == "library":
-        copydir.copy("library", args[1])
+        copydir.copy("library", path)
     if args[0] == "service":
-        copydir.copy("service", args[1])
-        print("command|editor goto \""+os.path.join(args[1], "Service.cs")+"|22|10\"")
+        copydir.copy("service", path)
+        print("command|editor goto \""+os.path.join(path, "Service.cs")+"|22|10\"")
 
 if __name__ == "__main__":
     args = sys.argv
-    if len(args) > 1 and args[1] == 'get-command-definitions':
+    if len(args) > 1 and args[2] == 'get-command-definitions':
         print_definitions()
     else:
-        run_command(args[1:])
+        run_command(args[1], args[4:])

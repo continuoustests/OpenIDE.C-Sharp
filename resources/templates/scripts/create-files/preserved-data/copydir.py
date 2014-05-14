@@ -18,7 +18,7 @@ def copyFile(projectName, replacements, source, destination):
     f2.close()
 
 def recurseDir(projectName, replacements, source, destination):
-    if os.path.isdir(destination) == False:
+    if destination != "" and os.path.isdir(destination) == False:
         os.makedirs(destination)
     for file in os.listdir(source):
         if os.path.isdir(os.path.join(source, file)):

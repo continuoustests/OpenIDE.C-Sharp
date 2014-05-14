@@ -1,6 +1,6 @@
 {
     "link": {
         "executable": "create-files/create.py",
-        "params": "{args}"
+        "params": "{run-location} {global-profile} {local-profile} {args}"
     }
 }
