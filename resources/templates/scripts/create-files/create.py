@@ -34,7 +34,7 @@ def run_command(run_location, args):
 
 if __name__ == "__main__":
     args = sys.argv
-    if len(args) > 1 and args[2] == 'get-command-definitions':
+    if len(args) > 2 and args[2] == 'get-command-definitions':
         print_definitions()
     else:
         run_command(args[1], args[4:])
