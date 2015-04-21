@@ -24,18 +24,12 @@ mkdir $DEPLOYDIR/C#-files/scripts
 mkdir $DEPLOYDIR/C#-files/snippets
 mkdir $DEPLOYDIR/C#-files/preserved-data
 mkdir $DEPLOYDIR/C#-files/preserved-data/new
-mkdir $DEPLOYDIR/C#-files/bin
-mkdir $DEPLOYDIR/C#-files/bin/AutoTest.Net
-mkdir $DEPLOYDIR/C#-files/bin/ContinuousTests
-
-chmod +x $LIB/ContinuousTests/AutoTest.*.exe
-chmod +x $LIB/ContinuousTests/ContinuousTests.exe
 
 xbuild CSharp.sln /target:rebuild /property:OutDir=$BINARYDIR/ /p:Configuration=Release;
 
 cp $ROOT/resources/C#.oilnk $DEPLOYDIR/C#.oilnk
 cp $ROOT/resources/language.oicfgoptions $DEPLOYDIR/C#-files/language.oicfgoptions
-cp $ROOT/resources/package.json.CT $DEPLOYDIR/C#-files/package.json
+cp $ROOT/resources/package.json $DEPLOYDIR/C#-files/package.json
 cp $BINARYDIR/C#.exe $DEPLOYDIR/C#-files/C#.exe
 cp $BINARYDIR/ICSharpCode.NRefactory.CSharp.dll $DEPLOYDIR/C#-files/ICSharpCode.NRefactory.CSharp.dll
 cp $BINARYDIR/ICSharpCode.NRefactory.dll $DEPLOYDIR/C#-files/ICSharpCode.NRefactory.dll
@@ -43,16 +37,7 @@ cp $BINARYDIR/Mono.Cecil.dll $DEPLOYDIR/C#-files/Mono.Cecil.dll
 cp -r $ROOT/resources/templates/new/* $DEPLOYDIR/C#-files/preserved-data/new
 cp -r $ROOT/resources/templates/scripts/* $DEPLOYDIR/C#-files/scripts
 cp -r $ROOT/resources/templates/snippets/* $DEPLOYDIR/C#-files/snippets
-cp $ROOT/resources/initialize.sh $DEPLOYDIR/C#-files
-cp $ROOT/resources/initialize.bat $DEPLOYDIR/C#-files
-cp -r $LIB/AutoTest.Net/* $DEPLOYDIR/C#-files/bin/AutoTest.Net
-cp -r $LIB/ContinuousTests/* $DEPLOYDIR/C#-files/bin/ContinuousTests
 
 # Building packages
 echo "Building packages.."
-oi package build $DEPLOYDIR/C\# $DEPLOYDIR
-rm -r $DEPLOYDIR/C\#-files/bin
-rm $DEPLOYDIR/C\#-files/initialize.*
-rm $DEPLOYDIR/C\#-files/package.json
-cp $ROOT/resources/package.json $DEPLOYDIR/C#-files/package.json
 oi package build $DEPLOYDIR/C\# $DEPLOYDIR
